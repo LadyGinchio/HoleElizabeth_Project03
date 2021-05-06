@@ -11,8 +11,14 @@ public class playerController : MonoBehaviour
     private int desiredLane = 1;
     public float laneDistance = 4;
 
+    public bool isGrounded;
+    public LayerMask groundLayer;
+    public Transform groundCheck;
+
     public float jumpForce;
     public float Gravity = -20;
+
+    public Animator animator;
 
     void Start()
     {
@@ -23,32 +29,37 @@ public class playerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        animator.SetBool("isGameStarted", true);
         direction.z = forwardSpeed;
 
+        isGrounded = Physics.CheckSphere(groundCheck.position, 0.15f, groundLayer);
+        animator.SetBool("isGrounded", isGrounded);
 
         if (controller.isGrounded)
         {
 
-            direction.y = -1;
-            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
+            direction.y = -2;
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || swipeManager.swipeUp)
             {
+
                 Jump();
 
             }
 
         }
         else {
-            direction.y += Gravity * Time.deltaTime;
+            direction.y += Gravity * Time.deltaTime; 
         }
 
-        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) 
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) || swipeManager.swipeRight) 
         {
             desiredLane++;
             if (desiredLane == 3) {
                 desiredLane = 2;
             }
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) || swipeManager.swipeLeft)
         {
             desiredLane--;
             if (desiredLane == -1)
@@ -56,7 +67,9 @@ public class playerController : MonoBehaviour
                 desiredLane = 0;
             }
         }
-
+        if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S) || swipeManager.swipeDown) { 
+        
+        }
      
         Vector3 targetPosition = transform.position.z * transform.forward + transform.position.y * transform.up;
 
@@ -68,6 +81,19 @@ public class playerController : MonoBehaviour
         }
 
         transform.position = targetPosition;
+        //transfom.position = Vector3.Lerp(transform.position, targetPosition, 70 * Time.deltaTime);
+        controller.center = controller.center;
+        /*
+            if(transform.position == targetPosition)
+                return;
+            Vector3 diff = targetPosition - transform.position;
+            Vector3 moveDir = diff.normalized * 25 * Time.deltaTime;
+            if(moveDir.sqMagnitude < diff.sqrMagnitude)
+                controller.Move(moveDir);
+            else
+                controller.Move(diff);
+         
+         */
 
     }
 
@@ -78,5 +104,15 @@ public class playerController : MonoBehaviour
     private void Jump()
     {
         direction.y = jumpForce;
+    }
+    private void Slide() { 
+    
+    }
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.transform.tag == "Obstacle") 
+        {
+            playerManager.gameOver = true;
+        }
     }
 }

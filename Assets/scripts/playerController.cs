@@ -18,12 +18,18 @@ public class playerController : MonoBehaviour
     public float jumpForce;
     public float Gravity = -20;
 
+    public bool isSliding;
+    public float originalHeight;
+    public float reducedHeight;
+    
+    
+
     public Animator animator;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
-
+        originalHeight = controller.height;
     }
 
     // Update is called once per frame
@@ -35,6 +41,7 @@ public class playerController : MonoBehaviour
 
         isGrounded = Physics.CheckSphere(groundCheck.position, 0.15f, groundLayer);
         animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isSliding", isSliding);
 
         if (controller.isGrounded)
         {
@@ -67,8 +74,11 @@ public class playerController : MonoBehaviour
                 desiredLane = 0;
             }
         }
-        if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S) || swipeManager.swipeDown) { 
-        
+        if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S) || swipeManager.swipeDown) {
+            isSliding = true;
+            Slide();
+            Invoke("stopSlide", 1.0f);
+            
         }
      
         Vector3 targetPosition = transform.position.z * transform.forward + transform.position.y * transform.up;
@@ -105,8 +115,20 @@ public class playerController : MonoBehaviour
     {
         direction.y = jumpForce;
     }
-    private void Slide() { 
-    
+    private void Slide() {
+        controller.height = reducedHeight;
+        controller.center = new Vector3(controller.center.x, controller.center.y / 2, controller.center.z);
+
+    }
+
+    private void stopSlide() {
+        isSliding = false;
+        controller.height = originalHeight;
+        controller.center = new Vector3(controller.center.x, controller.center.y * 2, controller.center.z);
+    }
+
+    private void goUp() {
+        controller.height = originalHeight;
     }
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {

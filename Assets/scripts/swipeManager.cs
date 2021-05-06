@@ -7,9 +7,8 @@ public class swipeManager : MonoBehaviour
     public static bool tap, swipeLeft, swipeRight, swipeUp, swipeDown;
     private bool isDragging = false;
     private Vector2 startTouch, swipeDelta;
-    // Start is called before the first frame update
-    
-    // Update is called once per frame
+
+
     void Update()
     {
         tap = swipeDown = swipeUp = swipeLeft = swipeRight = false;
@@ -27,15 +26,17 @@ public class swipeManager : MonoBehaviour
         #endregion
 
         #region Mobile Input
-        if (Input.touches[0].phase == TouchPhase.Began)
-        {
-            tap = true;
-            isDragging = true;
-            startTouch = Input.touches[0].position;
-        }
-        else if (Input.touches[0].phase == TouchPhase.Ended || Input.touches[0].phase == TouchPhase.Canceled) {
-            isDragging = false;
-            Reset();
+        if (Input.touches.Length > 0) {
+            if (Input.touches[0].phase == TouchPhase.Began)
+            {
+                tap = true;
+                isDragging = true;
+                startTouch = Input.touches[0].position;
+            }
+            else if (Input.touches[0].phase == TouchPhase.Ended || Input.touches[0].phase == TouchPhase.Canceled) {
+                isDragging = false;
+                Reset();
+            }
         }
         #endregion
 

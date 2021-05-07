@@ -8,6 +8,10 @@ public class playerController : MonoBehaviour
     private Vector3 direction;
     public float forwardSpeed;
 
+    [SerializeField] AudioClip _jump;
+    [SerializeField] AudioClip _laneShift;
+    [SerializeField] AudioClip _slide;
+
     private int desiredLane = 1;
     public float laneDistance = 4;
 
@@ -40,8 +44,9 @@ public class playerController : MonoBehaviour
         direction.z = forwardSpeed;
 
         isGrounded = Physics.CheckSphere(groundCheck.position, 0.15f, groundLayer);
-        animator.SetBool("isGrounded", isGrounded);
+        
         animator.SetBool("isSliding", isSliding);
+        
 
         if (controller.isGrounded)
         {
@@ -51,27 +56,32 @@ public class playerController : MonoBehaviour
             {
 
                 Jump();
-
+                animator.SetBool("isGrounded", false);
             }
 
         }
         else {
             direction.y += Gravity * Time.deltaTime; 
+            animator.SetBool("isGrounded",true);
         }
 
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) || swipeManager.swipeRight) 
         {
+            AudioSource audioSource = playerAudio.PlayClip2D(_laneShift, 1);
             desiredLane++;
             if (desiredLane == 3) {
                 desiredLane = 2;
+                
             }
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) || swipeManager.swipeLeft)
         {
+            AudioSource audioSource = playerAudio.PlayClip2D(_laneShift, 1);
             desiredLane--;
             if (desiredLane == -1)
             {
                 desiredLane = 0;
+                
             }
         }
         if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S) || swipeManager.swipeDown) {
@@ -114,8 +124,10 @@ public class playerController : MonoBehaviour
     private void Jump()
     {
         direction.y = jumpForce;
+        AudioSource audioSource = jumpAudio.PlayClip2D(_jump, 1);
     }
     private void Slide() {
+        AudioSource audioSource = playerAudio.PlayClip2D(_slide, 1);
         controller.height = reducedHeight;
         controller.center = new Vector3(controller.center.x, controller.center.y / 2, controller.center.z);
 
@@ -127,9 +139,7 @@ public class playerController : MonoBehaviour
         controller.center = new Vector3(controller.center.x, controller.center.y * 2, controller.center.z);
     }
 
-    private void goUp() {
-        controller.height = originalHeight;
-    }
+    
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (hit.transform.tag == "Obstacle") 
